@@ -1,0 +1,84 @@
+{
+  "projectType": "general",
+  "projectName": "MUDE Music Player",
+  "projectDescription": "A VS Code extension that integrates YouTube Music playback directly into the editor with automatic playlists and playback controls.",
+  "theme": "almond",
+  "primaryColor": "#FF6B6B",
+  "lightColor": "#FFE66D",
+  "darkColor": "#4ECDC4",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "installation",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Features",
+            "pages": [
+              "features/music-search",
+              "features/playback-controls",
+              "features/auto-playlists",
+              "features/status-bar"
+            ]
+          },
+          {
+            "group": "Configuration",
+            "pages": [
+              "configuration/mpv-setup",
+              "configuration/requirements"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/basic-usage",
+              "guides/troubleshooting"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Development",
+        "groups": [
+          {
+            "group": "Contributing",
+            "pages": [
+              "development/contributing",
+              "development/architecture",
+              "development/building"
+            ]
+          },
+          {
+            "group": "Reference",
+            "pages": [
+              "reference/commands",
+              "reference/api"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Search and play music from YouTube Music without ads or login",
+    "Automatic playlist generation from recommendations",
+    "Integrated status bar controls with seek, play/pause, and track navigation",
+    "Persistent playback state across VS Code sessions",
+    "MPV-based audio playback for high quality streaming"
+  ],
+  "publicApiSurface": [
+    "MudePlayer.searchMusic",
+    "MudePlayer.togglePause",
+    "MudePlayer.seekForward",
+    "MudePlayer.seekBackword",
+    "MudePlayer.playNext",
+    "MudePlayer.playPrevious"
+  ]
+}
