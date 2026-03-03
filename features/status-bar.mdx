@@ -1,0 +1,354 @@
+---
+title: Status bar integration
+description: Control your music directly from the VS Code status bar
+---
+
+MUDE integrates seamlessly into your VS Code status bar, providing quick access to music controls without disrupting your workflow.
+
+## Status bar layout
+
+The status bar displays all playback controls and information in a compact, organized manner:
+
+```
+🎧 | ◄ | ◄ | ⏸ | ► | ► | Currently Playing Track | 2:34
+```
+
+From left to right:
+
+1. **Logo button** (🎧) - Search for music
+2. **Previous track** (◄) - Play previous recommendation
+3. **Seek backward** (◄) - Rewind 10 seconds
+4. **Play/Pause** (⏸/▶) - Toggle playback
+5. **Seek forward** (►) - Fast forward 10 seconds
+6. **Next track** (►) - Play next recommendation
+7. **Track name** - Currently playing track
+8. **Timestamp** - Current playback position
+
+<Info>
+All controls are positioned in the left section of the status bar with priority level 185 (logo has priority 200) to ensure consistent placement.
+</Info>
+
+## Individual controls
+
+Each status bar item is created and configured with specific properties:
+
+### Logo button
+
+```typescript
+logoButton = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 200);
+logoButton.text = '🎧';
+logoButton.command = 'MudePlayer.searchYoutube';
+logoButton.tooltip = 'Search for some music!!';
+logoButton.show();
+```
+
+<Note>
+The logo button is always visible, even when no music is playing, providing quick access to search functionality.
+</Note>
+
+### Playback controls
+
+<Tabs>
+  <Tab title="Play/Pause">
+    ```typescript
+    togglePauseButton = vscode.window.createStatusBarItem(
+      vscode.StatusBarAlignment.Left, 185
+    );
+    togglePauseButton.command = 'MudePlayer.togglePause';
+    togglePauseButton.text = '$(debug-start)';
+    ```
+
+    The icon and tooltip update dynamically based on playback state:
+    - Playing: `$(debug-pause)` with tooltip "Pause"
+    - Paused: `$(notebook-execute)` with tooltip "Play"
+  </Tab>
+  <Tab title="Seek Backward">
+    ```typescript
+    seekBackwordButton = vscode.window.createStatusBarItem(
+      vscode.StatusBarAlignment.Left, 185
+    );
+    seekBackwordButton.command = 'MudePlayer.seekBackword';
+    seekBackwordButton.text = '$(chevron-left)';
+    seekBackwordButton.tooltip = '-10s';
+    ```
+  </Tab>
+  <Tab title="Seek Forward">
+    ```typescript
+    seekForwardButton = vscode.window.createStatusBarItem(
+      vscode.StatusBarAlignment.Left, 185
+    );
+    seekForwardButton.command = 'MudePlayer.seekForward';
+    seekForwardButton.text = '$(chevron-right)';
+    seekForwardButton.tooltip = '+10s';
+    ```
+  </Tab>
+</Tabs>
+
+### Track navigation
+
+<Tabs>
+  <Tab title="Next Track">
+    ```typescript
+    playNextButton = vscode.window.createStatusBarItem(
+      vscode.StatusBarAlignment.Left, 185
+    );
+    playNextButton.command = 'MudePlayer.playNext';
+    playNextButton.text = '$(triangle-right)';
+    playNextButton.tooltip = getNextRecommendationTooltip();
+    ```
+
+    Tooltip dynamically shows the next track name when available.
+  </Tab>
+  <Tab title="Previous Track">
+    ```typescript
+    playPreviousButton = vscode.window.createStatusBarItem(
+      vscode.StatusBarAlignment.Left, 185
+    );
+    playPreviousButton.command = 'MudePlayer.playPrevious';
+    playPreviousButton.text = '$(triangle-left)';
+    playPreviousButton.tooltip = getPreviousRecommendationTooltip();
+    ```
+
+    Tooltip dynamically shows the previous track name when available.
+  </Tab>
+</Tabs>
+
+### Track information
+
+<Tabs>
+  <Tab title="Track Name">
+    ```typescript
+    youtubeLabelButton = vscode.window.createStatusBarItem(
+      vscode.StatusBarAlignment.Left, 180
+    );
+    let storedValue = context.globalState.get<string>('youtubeLabelButton', '');
+    youtubeLabelButton.text = storedValue;
+    youtubeLabelButton.show();
+    ```
+
+    Displays various states:
+    - Track name when playing
+    - `$(loading~spin) Downloading [Track]...` during download
+    - `$(loading~spin) Loading [Track]...` during loading
+    - `$(error) Error loading [Track]` on error
+  </Tab>
+  <Tab title="Timestamp">
+    ```typescript
+    timestampButton = vscode.window.createStatusBarItem(
+      vscode.StatusBarAlignment.Left, 170
+    );
+    timestampButton.text = '';
+    ```
+
+    Updates in real-time with current playback position:
+    - Format: `MM:SS` for tracks under 1 hour
+    - Format: `HH:MM:SS` for longer content
+
+    ```typescript
+    player.on('timeposition', async (timePosition: number) => {
+      const time = new Date(timePosition * 1000).toISOString();
+      timestampButton.text = timePosition < 3600 
+        ? time.substring(14, 19)  // MM:SS
+        : time.substring(11, 19); // HH:MM:SS
+    });
+    ```
+  </Tab>
+</Tabs>
+
+## State management
+
+The status bar automatically adapts to the player state:
+
+### Playing state
+
+```typescript
+export async function playingState(context: vscode.ExtensionContext) {
+  playPreviousButton.show();
+  seekBackwordButton.show();
+  togglePauseButton.show();
+  seekForwardButton.show();
+  playNextButton.show();
+  timestampButton.show();
+  await context.globalState.update('isPlaying', true);
+}
+```
+
+When music is playing, all playback controls are visible.
+
+### Stopped state
+
+```typescript
+export async function stoppedState(context: vscode.ExtensionContext) {
+  playPreviousButton.hide();
+  seekBackwordButton.hide();
+  togglePauseButton.hide();
+  seekForwardButton.hide();
+  playNextButton.hide();
+  timestampButton.hide();
+  await context.globalState.update('isPlaying', false);
+}
+```
+
+When no music is playing, controls hide to reduce visual clutter.
+
+<Tip>
+The state is persisted in global storage, so your playback state is maintained across VS Code restarts.
+</Tip>
+
+## Event listeners
+
+Status bar items respond to player events automatically:
+
+### Player started
+
+```typescript
+player.on('started', async () => {
+  console.log('Started playing');
+  togglePauseButton.tooltip = 'Pause';
+  togglePauseButton.text = '$(debug-pause)';
+  updateTooltips();
+  vscode.commands.executeCommand('extension.refreshRecommendations');
+  vscode.commands.executeCommand('extension.refreshState');
+});
+```
+
+### Player stopped
+
+```typescript
+player.on('stopped', async () => {
+  console.log('Stopped playing');
+  updateTooltips();
+  vscode.commands.executeCommand('extension.refreshRecommendations');
+  vscode.commands.executeCommand('extension.refreshState');
+});
+```
+
+### Time position updates
+
+```typescript
+player.on('timeposition', async (timePosition: number) => {
+  const time = new Date(timePosition * 1000).toISOString();
+  timestampButton.text = timePosition < 3600 
+    ? time.substring(14, 19) 
+    : time.substring(11, 19);
+  updateTooltips();
+  vscode.commands.executeCommand('extension.refreshYoutubeLabelButton');
+  vscode.commands.executeCommand('extension.refreshRecommendations');
+  vscode.commands.executeCommand('extension.refreshState');
+});
+```
+
+<Info>
+Tooltips are updated on every time position change to ensure they always reflect the current recommendation queue state.
+</Info>
+
+## Cross-window synchronization
+
+Status bar state is synchronized across multiple VS Code windows:
+
+```typescript
+context.subscriptions.push(
+  vscode.window.onDidChangeWindowState(() => {
+    vscode.commands.executeCommand('extension.refreshYoutubeLabelButton');
+    vscode.commands.executeCommand('extension.refreshRecommendations');
+    vscode.commands.executeCommand('extension.refreshState');
+  })
+);
+```
+
+### Refresh commands
+
+<Tabs>
+  <Tab title="Refresh Label">
+    ```typescript
+    vscode.commands.registerCommand('extension.refreshYoutubeLabelButton', () => {
+      let newValue = context.globalState.get<string>('youtubeLabelButton', '');
+      youtubeLabelButton.text = newValue;
+    });
+    ```
+
+    Updates the track name display from global state.
+  </Tab>
+  <Tab title="Refresh Recommendations">
+    ```typescript
+    vscode.commands.registerCommand('extension.refreshRecommendations', () => {
+      const newRecommendations = context.globalState.get('recommendations', []);
+      const newIndex = context.globalState.get('currentRecommendationIndex', 0);
+      recommendations.splice(0, recommendations.length, ...newRecommendations);
+      updateRecommendationIndex(newIndex);
+      updateTooltips();
+    });
+    ```
+
+    Synchronizes the recommendation queue and updates tooltips.
+  </Tab>
+  <Tab title="Refresh State">
+    ```typescript
+    vscode.commands.registerCommand('extension.refreshState', async () => {
+      const isPlaying = context.globalState.get<boolean>('isPlaying', false);
+      if (isPlaying) {
+        await playingState(context);
+      } else {
+        await stoppedState(context);
+      }
+    });
+    ```
+
+    Updates control visibility based on playback state.
+  </Tab>
+</Tabs>
+
+<Note>
+These refresh commands ensure that all VS Code windows display the same playback state, even when you switch between them.
+</Note>
+
+## Smart tooltips
+
+Tooltips provide contextual information about the next and previous tracks:
+
+```typescript
+function getNextRecommendationTooltip(): string {
+  const nextIndex = currentRecommendationIndex;
+  if (nextIndex < recommendations.length) {
+    return `Up next: ${recommendations[nextIndex].title}`;
+  }
+  return 'Play next';
+}
+
+function getPreviousRecommendationTooltip(): string {
+  const prevIndex = currentRecommendationIndex - 1;
+  if (prevIndex >= 0) {
+    return `Play previous: ${recommendations[prevIndex].title}`;
+  }
+  return 'Play previous';
+}
+
+function updateTooltips() {
+  playNextButton.tooltip = getNextRecommendationTooltip();
+  playPreviousButton.tooltip = getPreviousRecommendationTooltip();
+}
+```
+
+<Tip>
+Hover over the next/previous track buttons to see what will play without clicking. This helps you decide whether to skip or continue listening.
+</Tip>
+
+## Icons reference
+
+MUDE uses VS Code's built-in codicons for consistent visual appearance:
+
+| Icon | Codicon | Purpose |
+|------|---------|----------|
+| 🎧 | (emoji) | Search button |
+| ◄ | `$(triangle-left)` | Previous track |
+| ◄ | `$(chevron-left)` | Seek backward |
+| ▶ | `$(notebook-execute)` | Play |
+| ⏸ | `$(debug-pause)` | Pause |
+| ► | `$(chevron-right)` | Seek forward |
+| ► | `$(triangle-right)` | Next track |
+| ⏳ | `$(loading~spin)` | Loading/downloading |
+| ❌ | `$(error)` | Error state |
+
+<Info>
+Codeicons automatically adapt to your VS Code theme, ensuring the status bar controls always match your editor's appearance.
+</Info>

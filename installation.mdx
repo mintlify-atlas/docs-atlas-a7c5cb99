@@ -1,0 +1,116 @@
+---
+title: Installation
+description: Install MUDE music player extension for VS Code
+---
+
+# Installation
+
+MUDE music player requires two components: the MPV media player and the VS Code extension.
+
+## Prerequisites
+
+### Install MPV
+
+MUDE uses MPV as the audio backend. You must install MPV before using the extension.
+
+<Note>
+  Make sure MPV is installed and available in your system PATH.
+</Note>
+
+<CodeGroup>
+
+```bash macOS
+brew install mpv
+```
+
+```bash Linux (Debian/Ubuntu)
+sudo apt-get install mpv
+```
+
+```bash Windows (Chocolatey)
+choco install mpv
+```
+
+</CodeGroup>
+
+<Info>
+  For other installation methods, visit the [official MPV installation page](https://mpv.io/installation/).
+</Info>
+
+### Verify MPV installation
+
+After installing MPV, verify it's available in your PATH:
+
+```bash
+mpv --version
+```
+
+You should see version information printed to the terminal. If you get a "command not found" error, MPV is not in your PATH and you'll need to add it manually.
+
+## Install the extension
+
+### From VS Code marketplace
+
+<Steps>
+  <Step title="Open VS Code">
+    Launch Visual Studio Code on your system.
+  </Step>
+  
+  <Step title="Open extensions view">
+    Click the Extensions icon in the Activity Bar on the left side, or press `Cmd+Shift+X` (macOS) / `Ctrl+Shift+X` (Windows/Linux).
+  </Step>
+  
+  <Step title="Search for MUDE">
+    Type "MUDE music player" in the search box at the top of the Extensions view.
+  </Step>
+  
+  <Step title="Install the extension">
+    Find "MUDE music player" by mayur1377 in the search results and click the **Install** button.
+  </Step>
+  
+  <Step title="Extension activates automatically">
+    MUDE activates automatically when VS Code starts. You'll see MUDE controls appear in the status bar at the bottom of the window.
+  </Step>
+</Steps>
+
+### From command line
+
+You can also install the extension using the VS Code command line:
+
+```bash
+code --install-extension mayur1377.MUDE
+```
+
+## Verify installation
+
+After installation, verify MUDE is working:
+
+1. Look for MUDE controls in the status bar at the bottom of VS Code
+2. Open the Command Palette (`Cmd+Shift+P` / `Ctrl+Shift+P`)
+3. Type "MUDE" - you should see MUDE commands like "MUDE: Search Music"
+
+<Warning>
+  If you see an error message saying "Failed to find MPV on your system!", MPV is not installed correctly or not in your PATH. Refer to the MPV installation steps above.
+</Warning>
+
+## Troubleshooting
+
+### MPV not found error
+
+If VS Code shows an error that MPV cannot be found:
+
+1. Verify MPV is installed: `mpv --version`
+2. Restart VS Code after installing MPV
+3. If the issue persists, ensure MPV is in your system PATH
+
+### Extension not activating
+
+If MUDE controls don't appear in the status bar:
+
+1. Check the extension is enabled in the Extensions view
+2. Reload VS Code: open Command Palette and run "Developer: Reload Window"
+3. Check the Output panel (View > Output) and select "MUDE" from the dropdown to see logs
+
+## Next steps
+
+Now that you have MUDE installed, check out the [quickstart guide](/quickstart) to play your first song!

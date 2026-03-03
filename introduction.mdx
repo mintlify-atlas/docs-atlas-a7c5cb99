@@ -1,0 +1,81 @@
+---
+title: Introduction
+description: Welcome to MUDE - a minimalistic music player integrated into VS Code
+---
+
+# Welcome to MUDE music player
+
+MUDE Player is a minimalistic music player integrated into your favorite editor, allowing you to play ad-free music from the comfort of your workspace. No login required, no ads, just pure music while you code.
+
+<CardGroup cols={2}>
+  <Card
+    title="Seamless integration"
+    icon="code"
+  >
+    Control your music directly from VS Code without leaving your editor
+  </Card>
+  <Card
+    title="YouTube Music"
+    icon="music"
+  >
+    Search and play music from YouTube Music within the editor, no login, no ads
+  </Card>
+  <Card
+    title="Auto-playlists"
+    icon="list"
+  >
+    Create playlists from your tracks and play them on the go - no need to search for music every time
+  </Card>
+  <Card
+    title="Playback controls"
+    icon="sliders"
+  >
+    Full playback controls including seek forward/backward, play/pause, next/previous track
+  </Card>
+</CardGroup>
+
+## What is MUDE?
+
+MUDE is a VS Code extension that brings music playback directly into your development environment. It uses MPV as the audio backend and integrates with YouTube Music to provide a seamless music experience while you code.
+
+The extension activates automatically when you start VS Code and provides a status bar interface for controlling playback. You can search for songs, create automatic playlists from recommendations, and control playback without ever leaving your editor.
+
+## Key features
+
+### Ad-free music streaming
+
+MUDE streams music from YouTube Music without ads or interruptions. Simply search for a song and start playing - no subscription or login required.
+
+### Automatic playlists
+
+When you play a song, MUDE automatically fetches recommendations and creates a playlist. When the current song ends, the next recommendation plays automatically, creating a continuous listening experience.
+
+### Complete playback controls
+
+MUDE provides all the controls you need:
+
+- **Seek forward**: Jump ahead 10 seconds
+- **Seek backward**: Go back 10 seconds  
+- **Play/Pause**: Toggle playback
+- **Next track**: Skip to the next song in the queue
+- **Previous track**: Return to the previous song
+
+### Status bar integration
+
+All playback controls are accessible from the VS Code status bar. See the current song title, playback status, and control buttons without opening any additional panels.
+
+## How it works
+
+MUDE uses `node-mpv` to interface with the MPV media player for audio playback. It uses `ytmusic-api` to search YouTube Music and `youtube-dl-exec` to download audio streams. The extension stores downloaded tracks temporarily and manages automatic playback of recommendations.
+
+When you search for music using the `MUDE: Search Music` command, the extension:
+
+1. Searches YouTube Music for your query
+2. Fetches recommendations for the selected track
+3. Downloads the audio stream
+4. Plays the track using MPV
+5. Automatically plays the next recommendation when the track ends
+
+## Get started
+
+Ready to add music to your coding sessions? Check out the [installation guide](/installation) to get started, or jump straight to the [quickstart guide](/quickstart) to play your first song.

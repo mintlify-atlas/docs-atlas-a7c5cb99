@@ -1,0 +1,202 @@
+---
+title: Playback controls
+description: Control your music with play/pause, seek, and track navigation
+---
+
+MUDE provides comprehensive playback controls integrated directly into your VS Code status bar, allowing you to control your music without leaving your editor.
+
+## Available controls
+
+All playback controls are accessible through both the status bar and command palette:
+
+### Play/pause
+
+Toggle between play and pause states with a single click.
+
+```typescript
+// Toggle pause implementation
+const state = await player.getProperty('pause');
+if (state) {
+  await player.resume();
+} else {
+  await player.pause();
+}
+```
+
+<Tabs>
+  <Tab title="Playing">
+    When music is playing, the control shows a pause icon `$(debug-pause)` with tooltip "Pause".
+  </Tab>
+  <Tab title="Paused">
+    When music is paused, the control shows a play icon `$(notebook-execute)` with tooltip "Play".
+  </Tab>
+</Tabs>
+
+<Note>
+If no media is loaded, attempting to toggle pause will display an information message: "No media is currently playing".
+</Note>
+
+### Seek controls
+
+Quickly navigate through the current track with seek forward and backward buttons.
+
+<Tabs>
+  <Tab title="Seek forward">
+    Skip ahead by 10 seconds.
+
+    ```typescript
+    await player.seek(10);
+    ```
+
+    - Icon: `$(chevron-right)`
+    - Tooltip: "+10s"
+    - Command: `MudePlayer.seekForward`
+  </Tab>
+  <Tab title="Seek backward">
+    Go back by 10 seconds.
+
+    ```typescript
+    await player.seek(-10);
+    ```
+
+    - Icon: `$(chevron-left)`
+    - Tooltip: "-10s"
+    - Command: `MudePlayer.seekBackword`
+  </Tab>
+</Tabs>
+
+<Tip>
+Seek controls are particularly useful for replaying parts of a song or skipping intros.
+</Tip>
+
+### Track navigation
+
+Navigate through your playlist with next and previous track controls.
+
+<Tabs>
+  <Tab title="Next track">
+    Play the next track in the recommendations queue.
+
+    ```typescript
+    // Play next recommendation
+if (currentRecommendationIndex < recommendations.length) {
+  const nextRecommendation = recommendations[currentRecommendationIndex];
+  updateRecommendationIndex(currentRecommendationIndex + 1);
+  await processTrack(context, ytmusicurl, nextRecommendation.title, ytmusicurl);
+}
+    ```
+
+    - Icon: `$(triangle-right)`
+    - Tooltip: Shows "Up next: [Track Name]" when available
+    - Command: `MudePlayer.playNext`
+  </Tab>
+  <Tab title="Previous track">
+    Play the previous track from the recommendations queue.
+
+    ```typescript
+    // Play previous recommendation
+if (currentRecommendationIndex > 0) {
+  const prevRecommendation = recommendations[currentRecommendationIndex - 1];
+  updateRecommendationIndex(currentRecommendationIndex - 1);
+  await processTrack(context, ytmusicurl, prevRecommendation.title, ytmusicurl);
+}
+    ```
+
+    - Icon: `$(triangle-left)`
+    - Tooltip: Shows "Play previous: [Track Name]" when available
+    - Command: `MudePlayer.playPrevious`
+  </Tab>
+</Tabs>
+
+<Info>
+Track navigation buttons display smart tooltips showing the actual track name that will play next or previous.
+</Info>
+
+## Command reference
+
+All playback controls are registered as VS Code commands:
+
+| Command | Title | Category | Description |
+|---------|-------|----------|-------------|
+| `MudePlayer.togglePause` | Toggle Pause | MUDE | Play or pause the current track |
+| `MudePlayer.seekForward` | +10 sec | MUDE | Skip forward 10 seconds |
+| `MudePlayer.seekBackword` | -10 sec | MUDE | Skip backward 10 seconds |
+| `MudePlayer.playNext` | Play Next Track | MUDE | Play the next track |
+| `MudePlayer.playPrevious` | Play Previous Track | MUDE | Play the previous track |
+
+<Note>
+You can assign custom keybindings to any of these commands through VS Code's keyboard shortcuts settings (File > Preferences > Keyboard Shortcuts).
+</Note>
+
+## Control visibility
+
+Playback controls automatically show and hide based on the player state:
+
+### Playing state
+
+When music is playing, all controls are visible:
+
+```typescript
+// Controls shown during playback
+- Play Previous button
+- Seek Backward button (-10s)
+- Pause button
+- Seek Forward button (+10s)
+- Play Next button
+- Timestamp display
+```
+
+### Stopped state
+
+When no music is playing, controls are hidden to reduce clutter:
+
+```typescript
+// Only visible when stopped
+- Logo button (🎧) - Click to search for music
+- Track name label (if previously played)
+```
+
+<Info>
+The control visibility is managed automatically by the player state machine. You don't need to manually show or hide controls.
+</Info>
+
+## MPV player integration
+
+MUDE uses the MPV media player under the hood for high-quality audio playback:
+
+```typescript
+import { player } from './player';
+
+// Player events
+player.on('started', async () => {
+  // Update UI when playback starts
+  togglePauseButton.text = '$(debug-pause)';
+});
+
+player.on('stopped', async () => {
+  // Handle track completion
+  // Automatically play next track if available
+});
+
+player.on('timeposition', async (timePosition: number) => {
+  // Update timestamp display
+  const time = new Date(timePosition * 1000).toISOString();
+  timestampButton.text = time.substring(14, 19); // MM:SS format
+});
+```
+
+<Tip>
+The timestamp display automatically adjusts format based on duration: MM:SS for tracks under 1 hour, HH:MM:SS for longer content.
+</Tip>
+
+## Error handling
+
+Playback controls gracefully handle errors:
+
+- **No media loaded**: Shows information message instead of crashing
+- **End of playlist**: Prompts user to search for more music
+- **Download failures**: Displays error in status bar with clear messaging
+
+<Note>
+If you encounter persistent playback issues, try searching for a new track to reset the player state.
+</Note>

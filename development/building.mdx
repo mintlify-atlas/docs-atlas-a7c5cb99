@@ -1,0 +1,303 @@
+---
+title: Building
+description: How to build and develop MUDE Music Player locally
+---
+
+This guide will help you set up your local development environment for MUDE Music Player.
+
+## Prerequisites
+
+Before you begin, ensure you have the following installed:
+
+- **Node.js** (version 20.x or higher)
+- **npm** (comes with Node.js)
+- **MPV media player** - Must be installed and available in your system PATH
+- **Visual Studio Code** (for testing the extension)
+
+### Installing MPV
+
+MPV is required for audio playback:
+
+<Tabs>
+  <Tab title="macOS">
+    ```bash
+    brew install mpv
+    ```
+  </Tab>
+  
+  <Tab title="Ubuntu/Debian">
+    ```bash
+    sudo apt update
+    sudo apt install mpv
+    ```
+  </Tab>
+  
+  <Tab title="Windows">
+    Download from [mpv.io](https://mpv.io/installation/) and add to your PATH.
+  </Tab>
+</Tabs>
+
+Verify MPV is installed:
+
+```bash
+mpv --version
+```
+
+## Setting up the development environment
+
+<Steps>
+  <Step title="Clone the repository">
+    Clone the MUDE repository to your local machine:
+    
+    ```bash
+    git clone https://github.com/mayur1377/MUDE-music-in-vscode.git
+    cd MUDE-music-in-vscode
+    ```
+  </Step>
+  
+  <Step title="Install dependencies">
+    Install all required npm packages:
+    
+    ```bash
+    npm install
+    ```
+    
+    This will install:
+    - `node-mpv` - MPV player wrapper
+    - `ytmusic-api` - YouTube Music API client
+    - `youtube-dl-exec` - yt-dlp downloader
+    - TypeScript and build tools
+  </Step>
+  
+  <Step title="Build the extension">
+    Compile the TypeScript source code:
+    
+    ```bash
+    npm run compile
+    ```
+    
+    This uses `esbuild` to bundle the extension into `out/extension.js`.
+  </Step>
+  
+  <Step title="Open in VS Code">
+    Open the project in Visual Studio Code:
+    
+    ```bash
+    code .
+    ```
+  </Step>
+  
+  <Step title="Launch the extension">
+    Press `F5` in VS Code to launch the Extension Development Host.
+    
+    This opens a new VS Code window with your extension loaded.
+  </Step>
+</Steps>
+
+## Available scripts
+
+The `package.json` defines several useful scripts:
+
+### Development scripts
+
+```bash
+# Compile for production (minified)
+npm run compile
+
+# Compile with sourcemaps for debugging
+npm run compile:dev
+
+# Watch mode (auto-recompile on changes)
+npm run watch
+
+# Lint the code
+npm run lint
+```
+
+### Build configuration
+
+The build process uses `esbuild` with these settings:
+
+- **Platform**: Node.js
+- **Target**: Node 18
+- **Format**: CommonJS
+- **Externals**: `vscode`, `youtube-dl-exec`, `node-mpv`
+- **Output**: `out/extension.js`
+
+### Package the extension
+
+To create a `.vsix` package for distribution:
+
+```bash
+npm run package
+```
+
+This creates a `MUDE-{version}.vsix` file that can be installed in VS Code.
+
+## Development workflow
+
+### Making changes
+
+<Steps>
+  <Step title="Edit source files">
+    Make changes to files in the `src/` directory.
+  </Step>
+  
+  <Step title="Rebuild">
+    Run the compile command:
+    
+    ```bash
+    npm run compile:dev
+    ```
+    
+    Or use watch mode for automatic rebuilds:
+    
+    ```bash
+    npm run watch
+    ```
+  </Step>
+  
+  <Step title="Reload the extension">
+    In the Extension Development Host window:
+    - Press `Ctrl+R` (or `Cmd+R` on macOS) to reload
+    - Or use the "Developer: Reload Window" command
+  </Step>
+  
+  <Step title="Test your changes">
+    Use the extension in the Development Host to verify your changes work correctly.
+  </Step>
+</Steps>
+
+### Debugging
+
+The extension includes extensive console logging:
+
+```typescript
+// Example logging from src/searchYoutube.ts
+console.log('[SEARCH] User entered search query:', input);
+console.log('[DOWNLOAD] Starting download from URL:', url);
+console.log('[PLAYBACK] Track loaded, starting playback');
+```
+
+View logs in:
+- **Developer Tools**: `Help > Toggle Developer Tools > Console`
+- **Output Panel**: `View > Output > Select "Extension Host"`
+
+## Project structure
+
+```
+MUDE-music-in-vscode/
+├── src/                   # TypeScript source files
+│   ├── extension.ts       # Extension entry point
+│   ├── player.ts          # MPV player wrapper
+│   ├── searchYoutube.ts   # Search and download logic
+│   ├── youtube.ts         # YouTube API integration
+│   ├── getRecommendations.ts
+│   ├── recommendations.ts
+│   ├── nextsongs.ts
+│   ├── controls.ts        # Command handlers
+│   ├── statusBar.ts       # UI components
+│   └── searchHistory.ts
+├── out/                   # Compiled JavaScript (gitignored)
+├── media/                 # Extension icons
+├── node_modules/          # Dependencies (gitignored)
+├── package.json           # Extension manifest
+├── tsconfig.json          # TypeScript configuration
+└── CONTRIBUTING.md        # Contribution guidelines
+```
+
+## Common issues
+
+### MPV not found
+
+If you see "Failed to find MPV on your system!":
+
+1. Verify MPV is installed: `mpv --version`
+2. Ensure MPV is in your system PATH
+3. Restart VS Code after installing MPV
+
+### yt-dlp download errors
+
+If downloads fail:
+
+1. Check your internet connection
+2. Verify `youtube-dl-exec` is installed: `npm ls youtube-dl-exec`
+3. On Windows, ensure the binary has `.exe` extension
+
+### Extension not activating
+
+If the extension doesn't load:
+
+1. Check the Output panel for errors
+2. Verify `out/extension.js` was created
+3. Try rebuilding: `npm run compile`
+
+## Testing changes
+
+### Manual testing checklist
+
+- [ ] Extension activates without errors
+- [ ] Search functionality works
+- [ ] Track downloads and plays
+- [ ] Playback controls (play/pause, seek, next/previous) work
+- [ ] Status bar updates correctly
+- [ ] Recommendations are fetched
+- [ ] Auto-play next track works
+- [ ] State persists across window reloads
+
+### Testing in multiple scenarios
+
+- Test with no internet connection (should show appropriate errors)
+- Test with no MPV installed (should show error message)
+- Test with multiple VS Code windows open
+- Test state restoration after closing and reopening VS Code
+
+## Publishing
+
+### Prepare for release
+
+<Steps>
+  <Step title="Update version">
+    Increment the version in `package.json`:
+    
+    ```json
+    {
+      "version": "1.0.17"
+    }
+    ```
+  </Step>
+  
+  <Step title="Build for production">
+    Run the production build:
+    
+    ```bash
+    npm run vscode:prepublish
+    ```
+  </Step>
+  
+  <Step title="Package the extension">
+    Create the `.vsix` file:
+    
+    ```bash
+    npm run package
+    ```
+  </Step>
+  
+  <Step title="Publish to marketplace">
+    Use `vsce` to publish:
+    
+    ```bash
+    npx vsce publish
+    ```
+    
+    You'll need a Personal Access Token from Azure DevOps.
+  </Step>
+</Steps>
+
+## Next steps
+
+- Read the [architecture documentation](/development/architecture) to understand the codebase
+- Check the [contributing guide](/development/contributing) for contribution guidelines
+- Join the development by fixing issues or adding features
+
+Happy coding! 🎧

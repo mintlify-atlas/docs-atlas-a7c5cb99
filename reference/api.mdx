@@ -1,0 +1,177 @@
+---
+title: API
+description: Extension API, events, and integration points for MUDE Music Player
+---
+
+This page documents the extension API, internal events, and integration points for MUDE Music Player.
+
+## Extension exports
+
+MUDE Music Player does not currently export a public API for use by other extensions. All functionality is accessed through VS Code commands.
+
+## Extension lifecycle
+
+### Activation
+
+The extension activates automatically when VS Code starts (`onStartupFinished` activation event).
+
+**Activation sequence:**
+
+1. Creates global storage directory if it doesn't exist
+2. Starts the MPV player instance
+3. Registers all commands and status bar items
+4. Attempts to restore the last played track from the previous session
+5. Sets up the UI in either playing or stopped state
+
+```typescript
+export async function activate(context: vscode.ExtensionContext)
+```
+
+The extension will show an error modal if MPV is not found on the system PATH.
+
+### Deactivation
+
+```typescript
+export async function deactivate(context: vscode.ExtensionContext)
+```
+
+On deactivation, the extension:
+- Quits the MPV player instance
+- Preserves playback state for the next session
+
+## Internal events
+
+MUDE uses the MPV player's event system to handle playback changes.
+
+### Player events
+
+| Event | Trigger | Behavior |
+|-------|---------|----------|
+| `stopped` | Track finishes playing | Automatically loads and plays the next recommended track |
+| `pause` | Playback is paused | Updates status bar to show play icon |
+| `resume` | Playback is resumed | Updates status bar to show pause icon |
+
+**Example: Automatic next track**
+
+When a track stops playing:
+1. Status bar updates to show "Loading next track..."
+2. Extension checks if recommendations are available
+3. If available, downloads and plays the next track
+4. If unavailable, shows "Search for more songs to play!" message
+
+## State management
+
+The extension uses VS Code's `globalState` API to persist data across sessions.
+
+### Stored state
+
+| Key | Type | Description |
+|-----|------|-------------|
+| `youtubeLabelButton` | string | Current track title shown in status bar |
+| `lastPlayedFilePath` | string | Path to the last downloaded track file |
+| `recommendations` | array | List of recommended tracks for continuous playback |
+| `currentRecommendationIndex` | number | Index of the current track in recommendations |
+
+**Example usage:**
+
+```typescript
+// Store track information
+await context.globalState.update('youtubeLabelButton', trackTitle);
+
+// Retrieve last played file
+const lastPlayedFilePath = context.globalState.get<string>('lastPlayedFilePath');
+```
+
+## Status bar integration
+
+The extension creates several status bar items for playback control:
+
+- **Track label**: Shows the currently playing track name
+- **Play/Pause button**: Toggles playback state
+- **Previous button**: Plays the previous track
+- **Next button**: Plays the next track
+- **Seek backward button**: Skips backward 10 seconds
+- **Seek forward button**: Skips forward 10 seconds
+
+**Status bar states:**
+
+1. **Playing state**: All controls visible, pause icon shown
+2. **Stopped state**: Only search and track label visible
+
+## File storage
+
+MUDE stores downloaded tracks in VS Code's global storage directory:
+
+```typescript
+context.globalStorageUri.fsPath + '/youtube_download.webm'
+```
+
+**Storage behavior:**
+- Each new download overwrites the previous file
+- Only one track is stored at a time
+- File persists across VS Code restarts for playback restoration
+
+## Dependencies
+
+MUDE relies on several external dependencies:
+
+### Required system dependencies
+
+- **MPV**: Media player for audio playback (must be on system PATH)
+
+### Node.js dependencies
+
+- **node-mpv**: Node.js interface for MPV player
+- **youtube-dl-exec**: Downloads audio from YouTube
+- **ytmusic-api**: Searches YouTube Music and fetches recommendations
+
+## Extension commands for internal use
+
+These commands are used internally for UI updates:
+
+- `extension.refreshYoutubeLabelButton`: Updates the track label in status bar
+- `extension.refreshRecommendations`: Refreshes the recommendations list
+
+## Error handling
+
+**Common error scenarios:**
+
+1. **MPV not found**: Shows error modal with installation instructions
+2. **No media loaded**: Shows information message when trying to control playback
+3. **Download fails**: Updates status bar with error message and returns to stopped state
+4. **No recommendations available**: Prompts user to search for more songs
+
+## Integration examples
+
+### Assigning keyboard shortcuts
+
+Add to your `keybindings.json`:
+
+```json
+[
+  {
+    "key": "ctrl+alt+space",
+    "command": "MudePlayer.togglePause"
+  },
+  {
+    "key": "ctrl+alt+right",
+    "command": "MudePlayer.playNext"
+  },
+  {
+    "key": "ctrl+alt+left",
+    "command": "MudePlayer.playPrevious"
+  }
+]
+```
+
+### Using commands in tasks
+
+You can trigger MUDE commands from VS Code tasks:
+
+```json
+{
+  "label": "Start Music",
+  "type": "shell",
+  "command": "${command:MudePlayer.searchMusic}"
+}
+```

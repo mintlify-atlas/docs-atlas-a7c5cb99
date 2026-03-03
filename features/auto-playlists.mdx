@@ -1,0 +1,229 @@
+---
+title: Auto playlists
+description: Continuous music playback with automatic recommendations from YouTube Music
+---
+
+MUDE automatically creates playlists for you using YouTube Music's recommendation algorithm, ensuring uninterrupted music playback while you code.
+
+## How it works
+
+When you select a track to play, MUDE automatically fetches recommendations and builds a playlist queue:
+
+```typescript
+// Fetch recommendations immediately after track selection
+const newRecommendations = await getRecommendations(ytmusicurl);
+newRecommendations.forEach(addRecommendation);
+```
+
+### Recommendation flow
+
+1. **Search and select**: Choose a track from search results
+2. **Fetch recommendations**: MUDE queries YouTube Music for related tracks
+3. **Build queue**: Recommendations are added to the playlist queue
+4. **Auto-play**: When current track ends, next recommendation plays automatically
+
+<Info>
+Recommendations are fetched using YouTube Music's "Up Next" algorithm, which considers your currently playing track to suggest similar music.
+</Info>
+
+## YouTube Music API integration
+
+MUDE uses the `ytmusic-api` package to fetch recommendations:
+
+```typescript
+import YTMusic from "ytmusic-api";
+const ytmusic = new YTMusic();
+
+export const getRecommendations = async (videoUrl: string) => {
+  const videoId = videoUrl.split('v=')[1];
+  
+  await ytmusic.initialize();
+  const upNexts = await ytmusic.getUpNexts(videoId);
+  
+  return upNexts;
+};
+```
+
+### Recommendation structure
+
+Each recommendation contains:
+
+```typescript
+{
+  videoId: string,  // YouTube video ID
+  title: string     // Track title
+}
+```
+
+<Note>
+Recommendations are stored both in memory and in VS Code's global state, ensuring they persist across window reloads.
+</Note>
+
+## Queue management
+
+The playlist queue is managed through a simple index-based system:
+
+### Current index tracking
+
+```typescript
+export let recommendations: { videoId: string, title: string }[] = [];
+export let currentRecommendationIndex = 0;
+```
+
+<Tabs>
+  <Tab title="Adding recommendations">
+    ```typescript
+    export function addRecommendation(recommendation: { videoId: string, title: string }) {
+      recommendations.push(recommendation);
+    }
+    ```
+
+    New recommendations are appended to the end of the queue.
+  </Tab>
+  <Tab title="Updating index">
+    ```typescript
+    export function updateRecommendationIndex(index: number) {
+      currentRecommendationIndex = index;
+    }
+    ```
+
+    The index is incremented when moving to the next track, decremented when going back.
+  </Tab>
+  <Tab title="Resetting queue">
+    ```typescript
+    export function resetRecommendations() {
+      recommendations.length = 0;
+      currentRecommendationIndex = 0;
+    }
+    ```
+
+    The queue is reset when you search for a new track.
+  </Tab>
+</Tabs>
+
+## Automatic playback
+
+When a track finishes playing, MUDE automatically plays the next recommendation:
+
+```typescript
+player.on('stopped', async () => {
+  if (currentRecommendationIndex < recommendations.length) {
+    const nextRecommendation = recommendations[currentRecommendationIndex];
+    updateRecommendationIndex(currentRecommendationIndex + 1);
+    
+    let ytmusicurl = `https://music.youtube.com/watch?v=${nextRecommendation.videoId}`;
+    await processTrack(context, ytmusicurl, nextRecommendation.title, ytmusicurl);
+  } else {
+    vscode.window.showInformationMessage('Search for more songs to play!');
+  }
+});
+```
+
+<Tip>
+The automatic playback system ensures you never experience silence while coding. When the queue is exhausted, you'll be prompted to search for more music.
+</Tip>
+
+## Navigation
+
+You can manually navigate through the recommendation queue:
+
+### Next track
+
+```typescript
+if (currentRecommendationIndex < recommendations.length) {
+  const nextRecommendation = recommendations[currentRecommendationIndex];
+  updateRecommendationIndex(currentRecommendationIndex + 1);
+  await processTrack(context, ytmusicurl, nextRecommendation.title, ytmusicurl);
+} else {
+  vscode.window.showWarningMessage("No more tracks next in playlist or recommendations.");
+}
+```
+
+### Previous track
+
+```typescript
+if (currentRecommendationIndex > 0) {
+  const prevRecommendation = recommendations[currentRecommendationIndex - 1];
+  updateRecommendationIndex(currentRecommendationIndex - 1);
+  await processTrack(context, ytmusicurl, prevRecommendation.title, ytmusicurl);
+} else {
+  vscode.window.showWarningMessage("No tracks beyond in playlist or recommendations.");
+}
+```
+
+<Info>
+The previous track feature allows you to replay tracks from earlier in your session, not just the immediately previous track.
+</Info>
+
+## Status bar integration
+
+The status bar displays helpful information about your queue:
+
+### Smart tooltips
+
+Playback control buttons show context-aware tooltips:
+
+```typescript
+// Next button tooltip
+function getNextRecommendationTooltip(): string {
+  const nextIndex = currentRecommendationIndex;
+  if (nextIndex < recommendations.length) {
+    return `Up next: ${recommendations[nextIndex].title}`;
+  }
+  return 'Play next';
+}
+
+// Previous button tooltip
+function getPreviousRecommendationTooltip(): string {
+  const prevIndex = currentRecommendationIndex - 1;
+  if (prevIndex >= 0) {
+    return `Play previous: ${recommendations[prevIndex].title}`;
+  }
+  return 'Play previous';
+}
+```
+
+<Note>
+Tooltips update dynamically as you navigate through the queue, always showing you what track will play next or previous.
+</Note>
+
+## State persistence
+
+Recommendations and queue position are persisted across VS Code sessions:
+
+```typescript
+// Save to global state
+await context.globalState.update('recommendations', recommendations);
+await context.globalState.update('currentRecommendationIndex', currentRecommendationIndex);
+
+// Restore on activation
+const savedRecommendations = context.globalState.get('recommendations', []);
+const savedIndex = context.globalState.get('currentRecommendationIndex', 0);
+```
+
+### Cross-window synchronization
+
+When you have multiple VS Code windows open, recommendations are synchronized:
+
+```typescript
+vscode.window.onDidChangeWindowState(() => {
+  vscode.commands.executeCommand('extension.refreshRecommendations');
+});
+```
+
+<Tip>
+If you switch between VS Code windows, your playlist queue and current position are automatically synchronized.
+</Tip>
+
+## End of queue behavior
+
+When you reach the end of the recommendation queue:
+
+1. Playback stops gracefully
+2. Status bar controls hide
+3. Information message prompts: "Search for more songs to play!"
+4. Search button remains visible for easy access
+
+<Info>
+You can start a new playlist session anytime by clicking the search button (🎧 icon) in the status bar.
+</Info>

@@ -1,80 +1,183 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quickstart
+description: Get up and running with MUDE in minutes
 ---
 
-## Get started in three steps
+Get MUDE up and running in just a few minutes. This guide will take you from installation to playing your first song.
 
-Get your documentation site running locally and make your first customization.
+## Prerequisites
 
-### Step 1: Set up your local environment
+Before you begin, make sure you have:
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
+- **VS Code 1.91.0 or higher** - Check your version with `code --version`
+- **MPV media player** - Required for audio playback
+
+## Step 1: Install MPV
+
+MUDE uses MPV for audio playback. Install it based on your operating system:
+
+<Tabs>
+  <Tab title="macOS">
+    ```bash
+    brew install mpv
+    ```
+  </Tab>
+  <Tab title="Linux">
+    <CodeGroup>
+      ```bash Ubuntu/Debian
+      sudo apt-get install mpv
+      ```
+      ```bash Fedora
+      sudo dnf install mpv
+      ```
+      ```bash Arch
+      sudo pacman -S mpv
+      ```
+    </CodeGroup>
+  </Tab>
+  <Tab title="Windows">
+    ```bash
+    choco install mpv
+    ```
     
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 2: Deploy your changes
-
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
-
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
-
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 3: Go live
-
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
-
-## Next steps
-
-Now that you have your docs running, explore these key features:
-
-<CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
-</CardGroup>
+    Or download from [mpv.io](https://mpv.io/installation/)
+  </Tab>
+</Tabs>
 
 <Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
+  Verify MPV is installed: `mpv --version`
+  
+  If you get a "command not found" error, MPV is not in your PATH. See the [installation guide](/installation) for troubleshooting.
 </Note>
+
+## Step 2: Install MUDE extension
+
+<Steps>
+  <Step title="Open VS Code extensions">
+    Press `Ctrl+Shift+X` (Windows/Linux) or `Cmd+Shift+X` (macOS) to open the Extensions view.
+  </Step>
+  
+  <Step title="Search for MUDE">
+    Type "MUDE" in the search bar and find "MUDE music player" by mayur1377.
+  </Step>
+  
+  <Step title="Install the extension">
+    Click the **Install** button.
+  </Step>
+  
+  <Step title="Reload VS Code">
+    The extension will activate automatically. You should see a 🎧 icon in your status bar.
+  </Step>
+</Steps>
+
+<Info>
+  If you don't see the 🎧 icon, reload VS Code with `Ctrl+Shift+P` → "Developer: Reload Window"
+</Info>
+
+## Step 3: Play your first song
+
+<Steps>
+  <Step title="Open the music search">
+    Click the 🎧 icon in the status bar, or:
+    - Press `Ctrl+Shift+P` (Windows/Linux) or `Cmd+Shift+P` (macOS)
+    - Type "MUDE: Search Music"
+    - Press Enter
+  </Step>
+  
+  <Step title="Search for a song">
+    Type the name of a song, artist, or album you want to play. MUDE will search YouTube Music and show you results.
+  </Step>
+  
+  <Step title="Select a track">
+    Use the arrow keys to browse results, then press Enter to select a track. MUDE will:
+    1. Download the audio
+    2. Start playback
+    3. Load automatic recommendations
+  </Step>
+  
+  <Step title="Control playback">
+    Once playing, you'll see controls in your status bar:
+    - **◀** - Previous track
+    - **◀◀** - Seek backward 10 seconds
+    - **⏸/▶** - Play/Pause
+    - **▶▶** - Seek forward 10 seconds
+    - **▶** - Next track
+  </Step>
+</Steps>
+
+## Available commands
+
+MUDE provides these commands accessible via the Command Palette (`Ctrl+Shift+P` or `Cmd+Shift+P`):
+
+| Command | Description |
+|---------|-------------|
+| **MUDE: Search Music** | Search and play music from YouTube Music |
+| **MUDE: Toggle Pause** | Play or pause the current track |
+| **MUDE: +10 sec** | Seek forward 10 seconds |
+| **MUDE: -10 sec** | Seek backward 10 seconds |
+| **MUDE: Play Next Track** | Skip to the next recommended track |
+| **MUDE: Play Previous Track** | Go back to the previous track |
+
+<Tip>
+  Set up keyboard shortcuts for your most-used commands:
+  
+  1. Open **Keyboard Shortcuts** (`Ctrl+K Ctrl+S` or `Cmd+K Cmd+S`)
+  2. Search for "MUDE"
+  3. Click the **+** icon to add a shortcut
+  
+  Suggested shortcuts:
+  - `Ctrl+Shift+M` (or `Cmd+Shift+M`) for Search Music
+  - `Ctrl+Shift+P` (or `Cmd+Shift+P`) for Toggle Pause
+</Tip>
+
+## What's next?
+
+<CardGroup cols={2}>
+  <Card title="Learn the features" icon="sparkles" href="/features/music-search">
+    Discover MUDE's automatic playlists, recommendations, and advanced controls
+  </Card>
+  <Card title="Configure MPV" icon="gear" href="/configuration/mpv-setup">
+    Optimize your MPV setup for the best audio experience
+  </Card>
+  <Card title="Basic usage guide" icon="book-open" href="/guides/basic-usage">
+    Learn tips and workflows for daily use
+  </Card>
+  <Card title="Troubleshooting" icon="wrench" href="/guides/troubleshooting">
+    Fix common issues and get help
+  </Card>
+</CardGroup>
+
+## How automatic playlists work
+
+When you play a song, MUDE automatically:
+
+1. **Fetches recommendations** from YouTube Music's "Up Next" section
+2. **Builds a queue** of similar tracks
+3. **Plays continuously** - when a track ends, the next one starts automatically
+4. **Updates the status bar** with upcoming track information
+
+<Info>
+  You can navigate through the recommendation queue using the Previous/Next buttons or commands.
+</Info>
+
+## Persistent playback
+
+MUDE remembers your playback state across VS Code sessions:
+
+- **Last played track** is restored when you reopen VS Code
+- **Recommendation queue** persists between windows
+- **Playback position** is maintained when switching windows
+
+<Note>
+  Playback starts paused when VS Code restarts. Click Play to resume.
+</Note>
+
+## Getting help
+
+Having issues? Here's where to get help:
+
+- **Troubleshooting guide**: [/guides/troubleshooting](/guides/troubleshooting)
+- **GitHub issues**: [Report a bug or request a feature](https://github.com/mayur1377/MUDE-music-in-vscode/issues)
+- **Check requirements**: Verify your [system meets all requirements](/configuration/requirements)
+
+Enjoy coding with music! 🎧

@@ -1,0 +1,165 @@
+---
+title: Basic usage
+description: Learn how to use MUDE Music Player for your daily listening needs
+---
+
+## Getting started
+
+MUDE integrates seamlessly into VS Code's status bar, providing intuitive controls for music playback while you work. Once installed and activated, you'll see a headphone emoji (🎧) in your status bar.
+
+## Searching and playing music
+
+<Steps>
+  <Step title="Open music search">
+    Click the headphone emoji (🎧) in the status bar or use the Command Palette:
+    - Press `Cmd+Shift+P` (Mac) or `Ctrl+Shift+P` (Windows/Linux)
+    - Type "MUDE: Search Music"
+    - Press Enter
+  </Step>
+
+  <Step title="Enter your search query">
+    Type the name of the song, artist, or album you want to listen to. MUDE searches YouTube Music for matching tracks.
+  </Step>
+
+  <Step title="Select a track">
+    Browse the search results and select your desired track. MUDE will:
+    - Display a loading indicator while downloading
+    - Automatically fetch recommendations for continuous playback
+    - Start playing the track once download completes
+  </Step>
+</Steps>
+
+<Note>
+  MUDE downloads audio files to your VS Code global storage directory. These files are reused on subsequent plays for faster playback.
+</Note>
+
+## Playback controls
+
+Once a track is playing, MUDE displays playback controls in the status bar:
+
+| Control | Icon | Action | Shortcut |
+|---------|------|--------|----------|
+| Previous track | ◀ | Play the previous track from history | Command Palette: "MUDE: Play Previous Track" |
+| Seek backward | ◀ | Jump back 10 seconds | Command Palette: "MUDE: -10 sec" |
+| Play/Pause | ▶/⏸ | Toggle playback | Command Palette: "MUDE: Toggle Pause" |
+| Seek forward | ▶ | Jump forward 10 seconds | Command Palette: "MUDE: +10 sec" |
+| Next track | ▶ | Play the next recommended track | Command Palette: "MUDE: Play Next Track" |
+| Track title | Text | Shows currently playing track | Click headphone emoji to search |
+| Timestamp | 00:00 | Shows current playback position | Updates in real-time |
+
+### Play/pause control
+
+The play/pause button automatically updates based on the current playback state:
+- **Pause icon** (⏸): Shows when music is playing - click to pause
+- **Play icon** (▶): Shows when music is paused - click to resume
+
+### Seeking through tracks
+
+Use the seek buttons to navigate within a track:
+- **Seek backward** (◀): Jumps 10 seconds back
+- **Seek forward** (▶): Jumps 10 seconds forward
+
+<Note>
+  You can use these controls multiple times in succession to skip larger time intervals (e.g., clicking seek forward 3 times skips 30 seconds).
+</Note>
+
+## Automatic playback and recommendations
+
+MUDE enhances your listening experience with intelligent recommendations:
+
+### How recommendations work
+
+<Steps>
+  <Step title="Initial search">
+    When you select a track, MUDE immediately fetches related recommendations from YouTube Music.
+  </Step>
+
+  <Step title="Continuous playback">
+    When the current track finishes, MUDE automatically plays the next recommended track from the queue.
+  </Step>
+
+  <Step title="Queue navigation">
+    Use the Previous/Next track buttons to navigate through your recommendation queue:
+    - **Next button** shows "Up next: [Track Name]" in the tooltip
+    - **Previous button** lets you replay tracks you've already heard
+  </Step>
+</Steps>
+
+<Warning>
+  Starting a new search resets your recommendation queue. If you want to return to previous tracks, use the Previous button instead of searching again.
+</Warning>
+
+### Managing your queue
+
+You can manually control the recommendation queue:
+- **Skip to next track**: Click the Next track button (▶) or use "MUDE: Play Next Track"
+- **Go back**: Click the Previous track button (◀) or use "MUDE: Play Previous Track"
+- **Check what's next**: Hover over the Next button to see the upcoming track title
+
+## State persistence
+
+MUDE remembers your playback state across VS Code sessions:
+
+### What gets saved
+
+- **Last played track**: The file path of your most recent track
+- **Playback position**: MUDE attempts to restore your last position
+- **Recommendation queue**: Your current queue and position within it
+
+### How restoration works
+
+When you restart VS Code:
+
+<Steps>
+  <Step title="Extension activates">
+    MUDE starts MPV and checks for saved playback state.
+  </Step>
+
+  <Step title="State restoration">
+    If a previously played track exists and the file is still available, MUDE:
+    - Loads the track into MPV
+    - Sets the player to paused state
+    - Displays the track title in the status bar
+  </Step>
+
+  <Step title="Resume playback">
+    Click the Play button to continue where you left off.
+  </Step>
+</Steps>
+
+<Note>
+  If the previously played file is no longer available, MUDE gracefully handles this and displays the stopped state. Simply search for a new track to start listening.
+</Note>
+
+## Tips for daily use
+
+### Efficient workflow
+
+1. **Keep the status bar visible**: MUDE's controls are always accessible in the status bar without interrupting your coding flow.
+
+2. **Use keyboard shortcuts**: Add custom keybindings for MUDE commands:
+   - Open VS Code settings
+   - Search for "Keyboard Shortcuts"
+   - Find MUDE commands and assign your preferred shortcuts
+
+3. **Let recommendations play**: MUDE's auto-play feature means you can start one song and enjoy hours of music without interruption.
+
+### Understanding status indicators
+
+- **🎧 (headphone emoji)**: Extension is active - click to search
+- **$(loading~spin) Loading...**: MUDE is downloading a track
+- **$(loading~spin) Downloading...**: Track download in progress
+- **$(error) Error loading**: Download or playback failed (see [troubleshooting](/guides/troubleshooting))
+- **Track title displayed**: Currently playing or loaded
+- **Empty status bar**: No track loaded - click headphone emoji to search
+
+### Multi-window support
+
+MUDE works across multiple VS Code windows:
+- The MPV player runs as a single instance
+- Opening a new window refreshes the status bar to show current playback
+- Playback continues even when switching between windows
+
+<Warning>
+  Closing all VS Code windows will stop the MPV player and end playback. Your state will be saved and restored when you reopen VS Code.
+</Warning>

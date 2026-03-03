@@ -1,0 +1,285 @@
+---
+title: Architecture
+description: System architecture and design of MUDE Music Player
+---
+
+MUDE is a VS Code extension that integrates a music player directly into your editor. This page explains the system architecture and how different components work together.
+
+## Overview
+
+MUDE consists of several key components:
+
+- **Extension activation** - Initializes the extension and sets up MPV
+- **MPV player wrapper** - Controls audio playback
+- **YouTube Music integration** - Searches and downloads music
+- **Recommendation system** - Manages playlists and auto-play
+- **UI controls** - Status bar buttons and commands
+- **State management** - Persists playback state across sessions
+
+## Extension activation flow
+
+The extension activates when VS Code starts up (`onStartupFinished`). Here's what happens:
+
+```typescript
+// src/extension.ts:8
+export async function activate(context: vscode.ExtensionContext) {
+  // 1. Create global storage directory
+  if (!fs.existsSync(context.globalStorageUri.fsPath)) {
+    fs.mkdirSync(context.globalStorageUri.fsPath);
+  }
+  
+  // 2. Start MPV player
+  try {
+    await player.start();
+  } catch (error) {
+    vscode.window.showErrorMessage("Failed to find MPV on your system!");
+    return;
+  }
+  
+  // 3. Initialize components
+  searchMusic(context);
+  controls(context);
+  statusBar(context);
+  
+  // 4. Restore last played track (if any)
+  const lastPlayedFilePath = context.globalState.get<string>('lastPlayedFilePath');
+  if (lastPlayedFilePath && fs.existsSync(lastPlayedFilePath)) {
+    await player.load(lastPlayedFilePath);
+    await playingState(context);
+    await player.pause(); // Start paused after restart
+  }
+}
+```
+
+### Activation sequence
+
+1. **Storage setup** - Creates global storage directory for downloaded files
+2. **MPV initialization** - Starts the MPV player process
+3. **Component registration** - Registers commands, controls, and status bar
+4. **State restoration** - Restores the last played track if available
+
+## MPV integration
+
+MUDE uses the `node-mpv` library to control the MPV media player:
+
+```typescript
+// src/player.ts:3
+export const player = new mpv({
+  audio_only: true,
+  auto_restart: true,
+});
+```
+
+### Key MPV features used
+
+- **Audio-only mode** - No video rendering for better performance
+- **Auto-restart** - Automatically restarts MPV if it crashes
+- **Property access** - Get media title, duration, pause state
+- **Event listeners** - React to playback events (started, stopped, timeposition)
+
+### MPV events
+
+The player emits events that drive the UI:
+
+```typescript
+// src/statusBar.ts:116
+player.on('started', async () => {
+  togglePauseButton.text = '$(debug-pause)';
+  updateTooltips();
+});
+
+player.on('stopped', async () => {
+  // Automatically play next track
+  updateTooltips();
+});
+
+player.on('timeposition', async (timePosition: number) => {
+  // Update timestamp display
+  timestampButton.text = formatTime(timePosition);
+});
+```
+
+## YouTube Music API usage
+
+MUDE uses the `ytmusic-api` library to search and fetch recommendations:
+
+### Search functionality
+
+```typescript
+// src/youtube.ts:277
+export async function getSearchResults(query: string): Promise<any> {
+  await ytmusic.initialize();
+  const songs = await ytmusic.searchSongs(query);
+  const videos = await ytmusic.searchVideos(query);
+  const searchResults = [...songs, ...videos];
+  return searchResults;
+}
+```
+
+### Download process
+
+MUDE uses `youtube-dl-exec` (yt-dlp) to download audio:
+
+```typescript
+// src/youtube.ts:219
+export async function downloadTrack(url: string, downloadPath: string): Promise<void> {
+  const ytDl = initializeYoutubeDl();
+  
+  await ytDl(url, {
+    output: downloadPath,
+    format: 'bestaudio/best',
+  });
+}
+```
+
+The download path is always `{globalStorage}/youtube_download.webm`, which gets overwritten for each new track.
+
+## Recommendation system
+
+The recommendation system provides automatic playlist continuation:
+
+### How it works
+
+1. **Fetch recommendations** - When a track is selected, fetch related tracks:
+
+```typescript
+// src/getRecommendations.ts:4
+export const getRecommendations = async (videoUrl: string) => {
+  const videoId = videoUrl.split('v=')[1];
+  await ytmusic.initialize();
+  const upNexts = await ytmusic.getUpNexts(videoId);
+  return upNexts;
+}
+```
+
+2. **Store globally** - Recommendations are stored in memory and persisted:
+
+```typescript
+// src/recommendations.ts:2
+export let recommendations: { videoId: string, title: string }[] = [];
+export let currentRecommendationIndex = 0;
+```
+
+3. **Auto-play next** - When a track stops, automatically play the next:
+
+```typescript
+// src/searchYoutube.ts:115
+player.on('stopped', async () => {
+  if (currentRecommendationIndex < recommendations.length) {
+    const nextRecommendation = recommendations[currentRecommendationIndex];
+    updateRecommendationIndex(currentRecommendationIndex + 1);
+    await processTrack(context, ytmusicurl, nextRecommendation.title, ytmusicurl);
+  }
+});
+```
+
+### Navigation
+
+Users can navigate recommendations manually:
+
+- **Play next** - `MudePlayer.playNext` command
+- **Play previous** - `MudePlayer.playPrevious` command
+
+## State management
+
+MUDE persists state across VS Code restarts using `context.globalState`:
+
+### Persisted state
+
+- `lastPlayedFilePath` - Path to the last downloaded track
+- `youtubeLabelButton` - Current track title
+- `recommendations` - Array of recommended tracks
+- `currentRecommendationIndex` - Current position in playlist
+- `isPlaying` - Whether player is active
+
+### Multi-window synchronization
+
+When multiple VS Code windows are open, state is synchronized:
+
+```typescript
+// src/statusBar.ts:88
+context.subscriptions.push(vscode.window.onDidChangeWindowState(() => {
+  vscode.commands.executeCommand('extension.refreshYoutubeLabelButton');
+  vscode.commands.executeCommand('extension.refreshRecommendations');
+  vscode.commands.executeCommand('extension.refreshState');
+}));
+```
+
+## UI integration
+
+The status bar provides all playback controls:
+
+### Status bar items (left to right)
+
+1. **Logo button** (🎧) - Opens search
+2. **Previous button** - Play previous track
+3. **Seek backward** - -10 seconds
+4. **Play/pause button** - Toggle playback
+5. **Seek forward** - +10 seconds
+6. **Next button** - Play next track
+7. **Track label** - Current track name
+8. **Timestamp** - Current playback position
+
+### Command palette
+
+All controls are also available via command palette:
+
+- `MUDE: Search Music`
+- `MUDE: Toggle Pause`
+- `MUDE: +10 sec`
+- `MUDE: -10 sec`
+- `MUDE: Play Next Track`
+- `MUDE: Play Previous Track`
+
+## Data flow
+
+Here's how data flows through the system:
+
+```
+1. User searches for music
+   └─> getSearchPick() shows input box
+       └─> getSearchResults() queries YouTube Music API
+           └─> User selects track
+
+2. Track is processed
+   └─> processTrack() downloads audio
+       └─> downloadTrack() uses yt-dlp
+           └─> File saved to globalStorage
+
+3. Recommendations fetched
+   └─> getRecommendations() queries YouTube Music API
+       └─> Recommendations stored globally
+           └─> UI tooltips updated
+
+4. Playback starts
+   └─> player.load() loads audio file
+       └─> player.play() starts playback
+           └─> Status bar updates to playing state
+
+5. Track ends
+   └─> 'stopped' event fired
+       └─> Next recommendation loaded
+           └─> Process repeats from step 2
+```
+
+## File structure
+
+- `extension.ts` - Entry point, activation/deactivation
+- `player.ts` - MPV player instance
+- `searchYoutube.ts` - Search UI and download logic
+- `youtube.ts` - YouTube Music API and yt-dlp integration
+- `getRecommendations.ts` - Fetches related tracks
+- `recommendations.ts` - Manages recommendation state
+- `nextsongs.ts` - Next/previous navigation
+- `controls.ts` - Command handlers for playback controls
+- `statusBar.ts` - Status bar UI and state management
+- `searchHistory.ts` - Recent plays history
+
+## Dependencies
+
+Key external dependencies:
+
+- `node-mpv` - MPV player wrapper for Node.js
+- `ytmusic-api` - YouTube Music API client
+- `youtube-dl-exec` - yt-dlp wrapper for downloading audio
+- `vscode` - VS Code extension API

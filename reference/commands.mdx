@@ -1,0 +1,132 @@
+---
+title: Commands
+description: Complete reference of all VS Code commands available in MUDE Music Player
+---
+
+MUDE Music Player provides several commands for controlling music playback directly from VS Code's command palette or through keyboard shortcuts.
+
+## Available commands
+
+| Command | Title | Description |
+|---------|-------|-------------|
+| `MudePlayer.searchMusic` | Search Music | Search and play music from YouTube Music |
+| `MudePlayer.togglePause` | Toggle Pause | Play or pause the currently playing track |
+| `MudePlayer.seekForward` | +10 sec | Skip forward 10 seconds in the current track |
+| `MudePlayer.seekBackword` | -10 sec | Skip backward 10 seconds in the current track |
+| `MudePlayer.playNext` | Play Next Track | Skip to the next recommended track |
+| `MudePlayer.playPrevious` | Play Previous Track | Go back to the previous track |
+
+## Command details
+
+### MudePlayer.searchMusic
+
+Opens a search interface to find and play music from YouTube Music.
+
+**Usage:**
+1. Open the command palette (`Ctrl+Shift+P` or `Cmd+Shift+P`)
+2. Type "MUDE: Search Music" or "MudePlayer.searchMusic"
+3. Enter your search query
+4. Select a track from the results
+
+**When to use it:**
+- When you want to find and play a new song
+- To start a music session
+- To switch to a different artist or album
+
+The search command automatically:
+- Downloads the selected track
+- Fetches recommendations for continuous playback
+- Updates the status bar with track information
+- Starts playback immediately
+
+### MudePlayer.togglePause
+
+Toggles between play and pause states for the current track.
+
+**Usage:**
+1. Open the command palette
+2. Type "MUDE: Toggle Pause"
+3. Or click the play/pause button in the status bar
+
+**When to use it:**
+- To pause music when you need to focus
+- To resume playback after a break
+- Quick control without opening the player interface
+
+**Behavior:**
+- If music is playing: pauses playback and shows play icon
+- If music is paused: resumes playback and shows pause icon
+- If no media is loaded: shows an information message
+
+### MudePlayer.seekForward
+
+Skips forward 10 seconds in the currently playing track.
+
+**Usage:**
+1. Open the command palette
+2. Type "MUDE: +10 sec"
+3. Or assign a custom keyboard shortcut
+
+**When to use it:**
+- To skip intros or quiet sections
+- To quickly navigate through a track
+- To replay a section by seeking backward then forward
+
+### MudePlayer.seekBackword
+
+Skips backward 10 seconds in the currently playing track.
+
+**Usage:**
+1. Open the command palette
+2. Type "MUDE: -10 sec"
+3. Or assign a custom keyboard shortcut
+
+**When to use it:**
+- To replay a section you just heard
+- To go back after accidentally seeking forward
+- To navigate to a specific part of a track
+
+### MudePlayer.playNext
+
+Skips to the next track in the recommendation queue.
+
+**Usage:**
+1. Open the command palette
+2. Type "MUDE: Play Next Track"
+3. Or click the next button in the status bar
+
+**When to use it:**
+- When you want to skip the current track
+- To explore more recommendations
+- To find new music quickly
+
+**Note:** The next track is automatically selected from the recommendations fetched when you searched for music. If no recommendations are available, you'll be prompted to search for more songs.
+
+### MudePlayer.playPrevious
+
+Goes back to the previous track in the playback history.
+
+**Usage:**
+1. Open the command palette
+2. Type "MUDE: Play Previous Track"
+3. Or click the previous button in the status bar
+
+**When to use it:**
+- To replay a track you just heard
+- To go back after accidentally skipping
+- To return to a favorite song from the current session
+
+## Keyboard shortcuts
+
+You can assign custom keyboard shortcuts to any command:
+
+1. Open keyboard shortcuts settings: `Ctrl+K Ctrl+S` (or `Cmd+K Cmd+S` on Mac)
+2. Search for "MUDE" to find all available commands
+3. Click the + icon next to a command to assign a shortcut
+
+**Recommended shortcuts:**
+- Toggle Pause: `Ctrl+Alt+Space`
+- Play Next: `Ctrl+Alt+Right`
+- Play Previous: `Ctrl+Alt+Left`
+- Seek Forward: `Ctrl+Alt+Up`
+- Seek Backward: `Ctrl+Alt+Down`

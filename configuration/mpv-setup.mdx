@@ -1,0 +1,164 @@
+---
+title: MPV setup
+description: Install and configure MPV for MUDE Music Player
+---
+
+MPV is a free, open-source media player that MUDE uses to play audio. You must have MPV installed on your system before using MUDE Music Player.
+
+<Warning>
+  MUDE will not work without MPV installed and available in your system PATH.
+</Warning>
+
+## Installation
+
+Choose your operating system below for installation instructions:
+
+<Tabs>
+  <Tab title="macOS">
+    <Steps>
+      <Step title="Install using Homebrew">
+        The easiest way to install MPV on macOS is using Homebrew:
+
+        ```bash
+        brew install mpv
+        ```
+      </Step>
+
+      <Step title="Verify installation">
+        Check that MPV is installed correctly:
+
+        ```bash
+        mpv --version
+        ```
+
+        You should see MPV version information displayed.
+      </Step>
+
+      <Step title="Restart VS Code">
+        After installing MPV, restart VS Code to ensure MUDE can detect it.
+      </Step>
+    </Steps>
+
+    ### Alternative installation methods
+
+    If you don't have Homebrew, you can download MPV directly from the [official website](https://mpv.io/installation/).
+  </Tab>
+
+  <Tab title="Linux">
+    <Steps>
+      <Step title="Install using package manager">
+        Install MPV using your distribution's package manager:
+
+        <CodeGroup>
+          ```bash Ubuntu/Debian
+          sudo apt-get install mpv
+          ```
+
+          ```bash Fedora
+          sudo dnf install mpv
+          ```
+
+          ```bash Arch Linux
+          sudo pacman -S mpv
+          ```
+        </CodeGroup>
+      </Step>
+
+      <Step title="Verify installation">
+        Check that MPV is installed correctly:
+
+        ```bash
+        mpv --version
+        ```
+
+        You should see MPV version information displayed.
+      </Step>
+
+      <Step title="Restart VS Code">
+        After installing MPV, restart VS Code to ensure MUDE can detect it.
+      </Step>
+    </Steps>
+  </Tab>
+
+  <Tab title="Windows">
+    <Steps>
+      <Step title="Install using Chocolatey">
+        The easiest way to install MPV on Windows is using Chocolatey:
+
+        ```bash
+        choco install mpv
+        ```
+
+        <Warning>
+          Make sure you run this command in an elevated (administrator) command prompt or PowerShell window.
+        </Warning>
+      </Step>
+
+      <Step title="Verify installation">
+        Check that MPV is installed correctly:
+
+        ```bash
+        mpv --version
+        ```
+
+        You should see MPV version information displayed.
+      </Step>
+
+      <Step title="Restart VS Code">
+        After installing MPV, restart VS Code to ensure MUDE can detect it.
+      </Step>
+    </Steps>
+
+    ### Alternative installation methods
+
+    If you don't have Chocolatey, you can:
+    1. Download MPV from the [official website](https://mpv.io/installation/)
+    2. Extract the archive to a location on your system
+    3. Add the MPV directory to your system PATH environment variable
+  </Tab>
+</Tabs>
+
+## Verifying MUDE can detect MPV
+
+After installing MPV and restarting VS Code:
+
+1. Open VS Code
+2. MUDE should activate automatically
+3. If MPV is not detected, you'll see an error message: **"Failed to find MPV on your system!"**
+
+<Warning>
+  If you see this error message, make sure MPV is installed and available in your system PATH. You may need to restart your computer for PATH changes to take effect.
+</Warning>
+
+## Troubleshooting
+
+### MPV not found after installation
+
+If MUDE can't find MPV after installation:
+
+1. **Restart VS Code** - This is often all that's needed
+2. **Check PATH** - Open a new terminal and run `mpv --version` to verify MPV is in your PATH
+3. **Restart your computer** - Some PATH changes require a full system restart
+4. **Manual PATH configuration** - If MPV still isn't found, you may need to manually add it to your system PATH
+
+### Permission issues (Linux/macOS)
+
+If you encounter permission errors, make sure the MPV binary has execute permissions:
+
+```bash
+which mpv  # Find MPV location
+ls -l $(which mpv)  # Check permissions
+```
+
+## Configuration
+
+MUDE uses MPV with the following configuration:
+
+- **Audio-only mode**: MPV runs in audio-only mode (no video window)
+- **Auto-restart**: MPV automatically restarts if it crashes
+
+These settings are configured automatically by MUDE and don't require manual configuration.
+
+## Learn more
+
+For more information about MPV, visit the [official MPV documentation](https://mpv.io/manual/stable/).

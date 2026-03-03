@@ -1,0 +1,374 @@
+---
+title: Troubleshooting
+description: Common issues and solutions for MUDE Music Player
+---
+
+## Installation issues
+
+<Accordion title="MPV not found error on activation">
+  **Error message**: "Failed to find MPV on your system!"
+
+  **Cause**: MUDE requires MPV to be installed and accessible from your system PATH.
+
+  **Solution**:
+
+  <Steps>
+    <Step title="Install MPV">
+      Download and install MPV for your operating system:
+      
+      **macOS**:
+      ```bash
+      brew install mpv
+      ```
+
+      **Ubuntu/Debian**:
+      ```bash
+      sudo apt install mpv
+      ```
+
+      **Windows**:
+      - Download from [mpv.io](https://mpv.io/installation/)
+      - Extract to a permanent location (e.g., `C:\Program Files\mpv`)
+      - Add the mpv directory to your system PATH
+    </Step>
+
+    <Step title="Verify installation">
+      Open a new terminal and run:
+      ```bash
+      mpv --version
+      ```
+      
+      You should see version information. If you get "command not found", MPV is not in your PATH.
+    </Step>
+
+    <Step title="Restart VS Code">
+      After installing MPV, completely restart VS Code (close all windows) to ensure the new PATH is recognized.
+    </Step>
+  </Steps>
+
+  <Note>
+    The extension checks for MPV during activation. If MPV is not found, the extension will not activate and you'll see a modal error dialog.
+  </Note>
+</Accordion>
+
+<Accordion title="Extension fails to activate silently">
+  **Symptom**: No headphone emoji appears in the status bar after installation.
+
+  **Possible causes**:
+  - MPV is not installed or not in PATH
+  - Extension activation failed during startup
+  - Global storage directory creation failed
+
+  **Solution**:
+
+  <Steps>
+    <Step title="Check extension status">
+      - Open Command Palette (`Cmd+Shift+P` or `Ctrl+Shift+P`)
+      - Type "Developer: Show Running Extensions"
+      - Look for "MUDE music player" in the list
+      - Check if it shows any errors
+    </Step>
+
+    <Step title="Check VS Code logs">
+      - Open Command Palette
+      - Type "Developer: Open Extension Logs Folder"
+      - Look for MUDE-related errors
+    </Step>
+
+    <Step title="Verify MPV installation">
+      Follow the MPV installation steps in the accordion above.
+    </Step>
+
+    <Step title="Reinstall the extension">
+      - Uninstall MUDE from the Extensions view
+      - Reload VS Code
+      - Reinstall MUDE from the marketplace
+    </Step>
+  </Steps>
+</Accordion>
+
+## Playback issues
+
+<Accordion title="No media is currently playing error">
+  **Error message**: "No media is currently playing" (when using play/pause)
+
+  **Cause**: You're trying to control playback before loading any media.
+
+  **Solution**:
+  
+  Search for and select a track first:
+  - Click the headphone emoji (🎧) in the status bar
+  - Or use Command Palette: "MUDE: Search Music"
+  - Select a track to load and play
+
+  <Note>
+    The play/pause control only works when media is loaded into MPV. After state restoration, you may need to click play to resume.
+  </Note>
+</Accordion>
+
+<Accordion title="Track downloads but doesn't play">
+  **Symptom**: Status bar shows the track title but no playback controls appear.
+
+  **Possible causes**:
+  - MPV failed to load the downloaded file
+  - The downloaded file is corrupted
+  - MPV lost connection to the extension
+
+  **Solution**:
+
+  <Steps>
+    <Step title="Check MPV process">
+      Verify MPV is running:
+      
+      **macOS/Linux**:
+      ```bash
+      ps aux | grep mpv
+      ```
+
+      **Windows**:
+      ```bash
+      tasklist | findstr mpv
+      ```
+    </Step>
+
+    <Step title="Try a different track">
+      Search for and select a different song to see if the issue persists.
+    </Step>
+
+    <Step title="Clear cached files">
+      MUDE stores downloaded files in VS Code's global storage:
+      - Close VS Code completely
+      - Navigate to the global storage directory:
+        - **macOS/Linux**: `~/.config/Code/User/globalStorage/mayur1377.mude/`
+        - **Windows**: `%APPDATA%\Code\User\globalStorage\mayur1377.mude\`
+      - Delete `youtube_download.webm`
+      - Restart VS Code and try again
+    </Step>
+
+    <Step title="Restart the extension">
+      - Open Command Palette
+      - Type "Developer: Reload Window"
+      - This restarts all extensions including MUDE
+    </Step>
+  </Steps>
+</Accordion>
+
+<Accordion title="Error loading track message">
+  **Error indicator**: `$(error) Error loading [Track Name]` in status bar
+
+  **Cause**: Download failed or MPV couldn't load the file.
+
+  **Common reasons**:
+  - Network connectivity issues
+  - YouTube/YouTube Music blocking the download
+  - Disk space issues
+  - Invalid video ID or unavailable content
+
+  **Solution**:
+
+  <Steps>
+    <Step title="Check internet connection">
+      Ensure you have a stable internet connection and can access YouTube.
+    </Step>
+
+    <Step title="Try a different track">
+      Some content may be region-restricted or unavailable. Search for a different song.
+    </Step>
+
+    <Step title="Check disk space">
+      Ensure you have sufficient disk space in your user directory for downloaded audio files.
+    </Step>
+
+    <Step title="Check VS Code output">
+      - Open Command Palette
+      - Type "Developer: Toggle Developer Tools"
+      - Check the Console tab for detailed error messages
+      - Look for download or playback errors
+    </Step>
+  </Steps>
+
+  <Warning>
+    If you consistently see this error, youtube-dl-exec (the download library) may need updating, or YouTube may have changed their API. Check for MUDE extension updates.
+  </Warning>
+</Accordion>
+
+<Accordion title="Audio stuttering or quality issues">
+  **Symptom**: Playback is choppy or audio quality is poor.
+
+  **Possible causes**:
+  - High CPU usage in VS Code
+  - Network issues during download
+  - MPV configuration issues
+
+  **Solution**:
+
+  1. **Check system resources**: Close unnecessary applications to free up CPU/memory
+  2. **Ensure complete download**: Wait for the download to fully complete before playback starts
+  3. **Restart MPV**: Reload VS Code to restart the MPV process
+  4. **Check MPV configuration**: MUDE runs MPV in audio-only mode for optimal performance
+
+  <Note>
+    MUDE downloads audio in WebM format from YouTube, which is optimized for streaming quality. Audio quality depends on what's available from YouTube Music.
+  </Note>
+</Accordion>
+
+<Accordion title="Auto-play not working">
+  **Symptom**: Track finishes but next recommendation doesn't play automatically.
+
+  **Possible causes**:
+  - No recommendations were fetched
+  - Reached the end of the recommendation queue
+  - MPV 'stopped' event not firing correctly
+
+  **Solution**:
+
+  <Steps>
+    <Step title="Check recommendations">
+      Hover over the Next track button (▶) to see if there's an "Up next" tooltip. If it says "Play next" with no track name, the recommendation queue is empty.
+    </Step>
+
+    <Step title="Start a new search">
+      Starting a new search fetches fresh recommendations:
+      - Click the headphone emoji (🎧)
+      - Search for a track
+      - Select and play
+    </Step>
+
+    <Step title="Manual navigation">
+      Use the Next track button to manually trigger the next recommendation.
+    </Step>
+  </Steps>
+
+  <Note>
+    When the recommendation queue is exhausted, MUDE shows an information message: "Search for more songs to play!" Simply start a new search to continue listening.
+  </Note>
+</Accordion>
+
+## State restoration issues
+
+<Accordion title="Playback doesn't restore after restarting VS Code">
+  **Symptom**: After restarting VS Code, the previous track isn't restored.
+
+  **Cause**: The cached audio file may have been deleted, or global state wasn't saved properly.
+
+  **Expected behavior**:
+  - MUDE saves the last played file path to VS Code's global state
+  - On activation, it checks if the file exists and loads it in paused state
+  - If the file is missing, it gracefully shows stopped state
+
+  **Solution**:
+
+  This is usually not an error. MUDE cleans up download files during playback:
+  - Each new download overwrites the previous `youtube_download.webm` file
+  - If the last file was overwritten, state restoration will show stopped state
+  - Simply search for a new track to continue listening
+
+  <Note>
+    State restoration is a convenience feature. It's normal for it not to work if you've closed VS Code for an extended period or the cache was cleared.
+  </Note>
+</Accordion>
+
+<Accordion title="Status bar shows wrong playback state">
+  **Symptom**: Status bar shows controls but nothing is playing, or vice versa.
+
+  **Cause**: State synchronization issue between MPV and the extension.
+
+  **Solution**:
+
+  <Steps>
+    <Step title="Refresh the window">
+      - Open Command Palette
+      - Type "Developer: Reload Window"
+      - This resyncs all state
+    </Step>
+
+    <Step title="Check actual playback">
+      Use Command Palette to check MPV properties:
+      - Try "MUDE: Toggle Pause" to see if anything happens
+      - If you get "No media is currently playing", the state was incorrect
+    </Step>
+
+    <Step title="Reset state">
+      If the issue persists:
+      - Close all VS Code windows
+      - Reopen VS Code
+      - The extension will re-initialize with correct state
+    </Step>
+  </Steps>
+</Accordion>
+
+<Accordion title="Recommendations not persisting across sessions">
+  **Symptom**: Recommendation queue is empty after restarting VS Code.
+
+  **Cause**: Recommendations are saved to global state but may not restore if:
+  - The global state wasn't saved before VS Code closed
+  - There's a timing issue during activation
+
+  **Solution**:
+
+  This is expected behavior for the current implementation. Recommendations are tied to the current session:
+  - Starting a new search fetches fresh recommendations
+  - The queue is populated based on the track you select
+  
+  If you want to continue with specific recommendations:
+  - Use the Previous/Next buttons during your session
+  - Avoid closing VS Code mid-playback if you want to maintain the queue
+
+  <Note>
+    Future versions of MUDE may improve recommendation persistence. For now, treat each session as a fresh start for your music queue.
+  </Note>
+</Accordion>
+
+## General troubleshooting steps
+
+If you encounter an issue not covered above:
+
+<Steps>
+  <Step title="Check prerequisites">
+    - MPV is installed and in your PATH
+    - VS Code is up to date (version 1.91.0 or higher)
+    - Internet connection is stable
+  </Step>
+
+  <Step title="Gather diagnostic information">
+    - Open Developer Tools (`Cmd+Shift+P` > "Developer: Toggle Developer Tools")
+    - Check the Console tab for JavaScript errors
+    - Look for MUDE-specific log messages (they include prefixes like `[PLAYBACK]`, `[SEARCH]`, `[DOWNLOAD]`)
+  </Step>
+
+  <Step title="Try a clean restart">
+    - Close all VS Code windows
+    - Kill any lingering MPV processes
+    - Reopen VS Code
+    - Test with a simple search
+  </Step>
+
+  <Step title="Report the issue">
+    If the problem persists:
+    - Visit the [GitHub repository](https://github.com/mayur1377/MUDE-music-in-vscode)
+    - Open an issue with:
+      - Your OS and VS Code version
+      - MPV version (`mpv --version`)
+      - Steps to reproduce
+      - Console logs from Developer Tools
+  </Step>
+</Steps>
+
+<Warning>
+  Do not manually kill MPV processes while MUDE is active, as this can cause state synchronization issues. Always use VS Code's reload or restart functions.
+</Warning>
+
+## Getting help
+
+If you need additional assistance:
+
+- **GitHub Issues**: [github.com/mayur1377/MUDE-music-in-vscode/issues](https://github.com/mayur1377/MUDE-music-in-vscode/issues)
+- **VS Code Extension Page**: Search for "MUDE music player" in the Extensions view
+- **Check for updates**: Ensure you're running the latest version (currently 1.0.16)
+
+When reporting issues, always include:
+- Your operating system
+- VS Code version
+- MUDE extension version
+- MPV version
+- Detailed error messages or logs

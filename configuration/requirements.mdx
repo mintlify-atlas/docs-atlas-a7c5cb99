@@ -1,0 +1,131 @@
+---
+title: Requirements
+description: System requirements and dependencies for MUDE Music Player
+---
+
+Before installing MUDE Music Player, ensure your system meets the following requirements.
+
+## VS Code version
+
+MUDE requires VS Code version **1.91.0** or higher.
+
+<Warning>
+  MUDE will not work on older versions of VS Code. Make sure you're running at least version 1.91.0.
+</Warning>
+
+To check your VS Code version:
+
+1. Open VS Code
+2. Go to **Help** → **About** (or **Code** → **About Visual Studio Code** on macOS)
+3. Check the version number displayed
+
+If you need to update VS Code, download the latest version from [code.visualstudio.com](https://code.visualstudio.com/).
+
+## MPV media player
+
+<Warning>
+  MPV is a **required** dependency. MUDE will not work without it.
+</Warning>
+
+MPV is a free, open-source media player that MUDE uses to play audio. It must be installed on your system and available in your PATH.
+
+### Why MPV?
+
+- **Lightweight**: MPV is fast and efficient
+- **Cross-platform**: Works on macOS, Linux, and Windows
+- **Audio-focused**: Perfect for background music playback
+- **Reliable**: Stable and well-maintained
+
+See the [MPV setup guide](/configuration/mpv-setup) for detailed installation instructions.
+
+## System requirements
+
+### Operating system
+
+MUDE supports:
+
+- **macOS**: 10.12 Sierra or later
+- **Linux**: Most modern distributions (Ubuntu, Fedora, Arch, etc.)
+- **Windows**: 10 or later
+
+### Hardware
+
+- **RAM**: 2GB minimum (4GB+ recommended)
+- **Disk space**: ~100MB for MUDE and dependencies
+- **Network**: Internet connection required for streaming music from YouTube Music
+
+### Package managers (optional)
+
+While not required, having a package manager installed makes it easier to install MPV:
+
+- **macOS**: [Homebrew](https://brew.sh/)
+- **Linux**: Your distribution's package manager (apt, dnf, pacman, etc.)
+- **Windows**: [Chocolatey](https://chocolatey.org/)
+
+## Dependencies
+
+MUDE automatically installs and manages the following Node.js dependencies:
+
+- **node-mpv** (2.0.0-beta.2): Node.js wrapper for MPV
+- **youtube-dl-exec** (^3.0.13): YouTube audio extraction
+- **ytmusic-api** (^5.3.1): YouTube Music API integration
+
+You don't need to install these manually - they're bundled with the extension.
+
+## Network requirements
+
+### Required access
+
+MUDE needs network access to:
+
+- **YouTube Music**: For searching and streaming music
+- **YouTube**: For audio streaming via youtube-dl
+
+### Firewall considerations
+
+If you're behind a corporate firewall, ensure outbound HTTPS connections to the following domains are allowed:
+
+- `music.youtube.com`
+- `youtube.com`
+- `ytimg.com`
+
+## Limitations
+
+### Known limitations
+
+- **No offline playback**: MUDE streams music from YouTube Music and requires an internet connection
+- **No video support**: MUDE is audio-only and doesn't display video content
+- **YouTube Music only**: Currently, MUDE only supports YouTube Music as a source
+
+### Performance considerations
+
+- Streaming music uses bandwidth (typically 128-256 kbps for audio)
+- MPV uses minimal CPU and RAM when playing audio
+- MUDE stores minimal data locally (playlists and preferences only)
+
+## Troubleshooting
+
+### Extension activation fails
+
+If MUDE fails to activate, check:
+
+1. **VS Code version**: Make sure you're running 1.91.0 or higher
+2. **MPV installation**: Verify MPV is installed and in your PATH
+3. **Extension logs**: Check the Output panel (View → Output) and select "MUDE" from the dropdown
+
+### "Failed to find MPV on your system"
+
+This error means MUDE can't detect MPV. To fix:
+
+1. Install MPV using the [MPV setup guide](/configuration/mpv-setup)
+2. Ensure MPV is in your system PATH
+3. Restart VS Code
+4. If the issue persists, restart your computer
+
+## Next steps
+
+Once you've verified your system meets these requirements:
+
+1. [Install MPV](/configuration/mpv-setup) if you haven't already
+2. [Install MUDE](/installation) from the VS Code marketplace
+3. [Get started](/quickstart) with playing music
